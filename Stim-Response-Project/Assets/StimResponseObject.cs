@@ -11,7 +11,7 @@ public class StimResponseObject : MonoBehaviour
 	public List<string> Stims;				// All ingame Stims represented by Strings
 	Dictionary<string, Action> GlobalStims;	// Dictionary Stim string -> System.Action
 
-	void Awake () 
+	void Start () 
 	{
 		GlobalStims = new Dictionary<string, Action>();	// Initialize Global Stim Dictionary
 		GlobalStims.Add("Fire", FireResponse);			// Fire
