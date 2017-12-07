@@ -35,3 +35,5 @@ sysinfo.txt
 Stim-Response-Project/Library/
 Stim-Response-Project/Temp/
 *.meta
+Stim-Response-Project/.vscode/
+Stim-Response-Project/obj/
