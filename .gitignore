@@ -33,3 +33,5 @@ sysinfo.txt
 *.apk
 *.unitypackage
 Stim-Response-Project/Library/
+Stim-Response-Project/Temp/
+*.meta
