@@ -22,7 +22,9 @@ public class PlayerController : MonoBehaviour
 
 	void Update () 
 	{
-		MouseLook();
+		// No MouseLook when attempting object manipulation via "Use" button
+		if (!Input.GetButton("Use")) MouseLook();
+		
 		Move();
 		// Simple Clamping to Floor
 		transform.position = new Vector3(transform.position.x, 1f, transform.position.z);
@@ -39,6 +41,7 @@ public class PlayerController : MonoBehaviour
 	{
 		float mX = Input.GetAxis("Mouse X");
 		float mY = Input.GetAxis("Mouse Y");
+
 		rotY += mX * mouseSensitivity * Time.deltaTime;
 		rotX += -mY * mouseSensitivity * Time.deltaTime;
 		rotX = Mathf.Clamp(rotX, -angleClamp, angleClamp);

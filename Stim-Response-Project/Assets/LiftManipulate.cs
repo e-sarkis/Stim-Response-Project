@@ -29,10 +29,20 @@ public class LiftManipulate : MonoBehaviour
 		} 
 	}
 
+	Quaternion rotationOffset;
     void UpdateLiftedObject()
 	{
 		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
-		objectLifted.transform.rotation = transform.rotation;
+
+		if (Input.GetButton("Use"))
+		{
+			float mX = Input.GetAxis("Mouse X");
+			float mY = Input.GetAxis("Mouse Y");
+			rotationOffset.eulerAngles += Quaternion.Euler(mY, -mX, 0).eulerAngles;
+		}
+
+		objectLifted.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + rotationOffset.eulerAngles);
+
 	}
 
 
@@ -69,6 +79,7 @@ public class LiftManipulate : MonoBehaviour
 		colliderLifted.enabled = false;
 		currentLiftDist = startLiftDist;
 		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
+		rotationOffset = new Quaternion();
 	}
 
 	void ThrowLiftedObject(float force = 0f)
