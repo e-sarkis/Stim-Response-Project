@@ -1,36 +1,45 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LiftManipulate : MonoBehaviour 
 {
-	float initialLiftRange = 1f;
+	public float initialLiftRange = 1.5f;
+	public float throwForce = 200f;
+
+	public float minLiftDist = 0.8f;
+	public float startLiftDist = 1;
+	public float maxLiftDist = 2.0f;
+	private float currentLiftDist = 0.0f;
 
 	GameObject objectLifted;
-
-	// Use this for initialization
-	void Start () 
-	{
-		
-	}
+	Rigidbody rbLifted;
+	Collider colliderLifted;
 	
 	// Update is called once per frame
 	void Update () 
 	{
 		if (!objectLifted) ObtainLiftable(); 		// Check for Liftable / Obtain Liftable
-		else UpdateLiftedObject();	// Perform Updates on Current Liftable
+		else
+		{
+			UpdateLiftedObject();	// Perform Updates on Current Liftable
+			if (Input.GetKeyDown(KeyCode.Mouse0)) ThrowLiftedObject();
+			if (Input.GetKeyDown(KeyCode.Mouse1)) ThrowLiftedObject(throwForce);
+		} 
 	}
 
-	void UpdateLiftedObject()
+    void UpdateLiftedObject()
 	{
-		objectLifted.transform.position = transform.position + (transform.forward * initialLiftRange);
+		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
+		objectLifted.transform.rotation = transform.rotation;
 	}
 
 
 	// Check for Input, and Grab the GameObject if in range and liftable
 	void ObtainLiftable()
 	{
-		if (Input.GetKey(KeyCode.Mouse0))
+		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
 			// We can attempt to lift object
 			Debug.DrawRay(transform.position, transform.forward, Color.red, initialLiftRange);
@@ -45,10 +54,30 @@ public class LiftManipulate : MonoBehaviour
 
 	void PrepForManipulation()
 	{
-		Rigidbody rb = objectLifted.GetComponent<Rigidbody>();
-		rb.useGravity = false;
-		Collider coll = objectLifted.GetComponent<Collider>();
-		coll.enabled = false;
+		PhysicsProperties ppLifted = objectLifted.GetComponent<PhysicsProperties>();
+		if (!ppLifted || !ppLifted.liftable)
+		{
+			objectLifted = null;
+			return;
+		}
+		// The GameObject is a confirmed liftable, continue
+		rbLifted = objectLifted.GetComponent<Rigidbody>();
+		rbLifted.velocity = Vector3.zero;
+		rbLifted.angularVelocity = Vector3.zero;
+		rbLifted.useGravity = false;
+		colliderLifted = objectLifted.GetComponent<Collider>();
+		colliderLifted.enabled = false;
+		currentLiftDist = startLiftDist;
+		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
 	}
+
+	void ThrowLiftedObject(float force = 0f)
+    {
+		rbLifted.useGravity = true;
+		colliderLifted.enabled = true;
+		// If force == 0 and Lifter was moving via their Rigidbody, we could apply Lifter velocity to objectLifted here.
+		rbLifted.AddForce(transform.forward * force);
+		objectLifted = null;
+    }
 	
 }
