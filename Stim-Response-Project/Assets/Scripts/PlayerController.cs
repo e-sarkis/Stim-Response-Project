@@ -7,11 +7,11 @@ using UnityEngine;
 /// </summary>
 public class PlayerController : MonoBehaviour 
 {
-	float moveForce = 1f;
+	public float moveSpeed = .15f;
 
-	void Start () 
+	void Awake () 
 	{
-		
+
 	}
 	
 
@@ -20,22 +20,25 @@ public class PlayerController : MonoBehaviour
 		Move();
 	}
 
+	/// <summary>
+	/// Simple 3D Translation
+	/// </summary>
 	void Move()
 	{
 		if (Input.GetAxisRaw("Horizontal") > 0)
 		{
-			// Move Forward
+			transform.Translate(transform.forward * moveSpeed); // Move Forward
 		} else if (Input.GetAxisRaw("Horizontal") < 0)
 		{
-			// Move Backward
+			transform.Translate(-transform.forward * moveSpeed); // Move Forward// Move Backward
 		}
 
 		if (Input.GetAxisRaw("Vertical") > 0)
 		{
-			// Strafe Right
+			transform.Translate(transform.right * moveSpeed);// Strafe Right
 		} else if (Input.GetAxisRaw("Vertical") < 0)
 		{
-			// Strafe Left
+			transform.Translate(-transform.right * moveSpeed);// Strafe Left
 		}
 	}
 }
