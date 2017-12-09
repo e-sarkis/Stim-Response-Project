@@ -17,10 +17,9 @@ public class LiftManipulate : MonoBehaviour
 	Rigidbody rbLifted;
 	Collider colliderLifted;
 	
-	// Update is called once per frame
 	void Update () 
 	{
-		if (!objectLifted) ObtainLiftable(); 		// Check for Liftable / Obtain Liftable
+		if (!objectLifted) ObtainLiftable(); // Check for Liftable / Obtain Liftable
 		else
 		{
 			UpdateLiftedObject();	// Perform Updates on Current Liftable
@@ -29,20 +28,23 @@ public class LiftManipulate : MonoBehaviour
 		} 
 	}
 
-	Quaternion rotationOffset;
+	private Quaternion rotationOffset;
     void UpdateLiftedObject()
 	{
-		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
-
+		// Distance manipulation
+		currentLiftDist += Input.GetAxis("Mouse ScrollWheel");
+		Mathf.Clamp(currentLiftDist, minLiftDist, maxLiftDist);
+		// Rotation maniupulation
 		if (Input.GetButton("Use"))
 		{
 			float mX = Input.GetAxis("Mouse X");
 			float mY = Input.GetAxis("Mouse Y");
-			rotationOffset.eulerAngles += Quaternion.Euler(mY, -mX, 0).eulerAngles;
+			objectLifted.transform.Rotate(Vector3.up, -mX, Space.World);
+			objectLifted.transform.Rotate(transform.right, mY, Space.World);
 		}
-
-		objectLifted.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + rotationOffset.eulerAngles);
-
+		//objectLifted.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + rotationOffset.eulerAngles);	
+		// Update position of lifted GameObject
+		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);		
 	}
 
 
