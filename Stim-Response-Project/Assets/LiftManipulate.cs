@@ -5,30 +5,33 @@ using UnityEngine;
 
 public class LiftManipulate : MonoBehaviour 
 {
-	public float initialLiftRange = 1.5f;
-	public float throwForce = 200f;
+	public float initialLiftRange 	= 1.5f;	// Range lifted GameObject is at Lift initiation
+	public float throwForce 		= 200f;	// Force applied when Lifter throws lifted GameObject
 
-	public float minLiftDist = 0.8f;
-	public float startLiftDist = 1;
-	public float maxLiftDist = 2.0f;
-	private float currentLiftDist = 0.0f;
+	public float minLiftDist 		= 0.8f;	// Closest range lifted GameObject can be to Lifter during lifting 
+	public float startLiftDist 		= 1;	// Range lifted GameObject is at Lift initiation
+	public float maxLiftDist 		= 2.0f;	// Furthest range lifted GameObject can be to Lifter during lifting 
+	private float currentLiftDist 	= 0.0f;	// Range of lifted GameObject to Lifter
 
-	GameObject objectLifted;
-	Rigidbody rbLifted;
-	Collider colliderLifted;
+	[HideInInspector] public GameObject objectLifted;	// GameObject being lifted
+	private Rigidbody rbLifted;							// Rigidbody of lifted GameObject
+	private Collider colliderLifted;					// Collider of lifted GameObject
+
+	public bool debug = false;
 	
 	void Update () 
 	{
-		if (!objectLifted) ObtainLiftable(); // Check for Liftable / Obtain Liftable
+		if (!objectLifted) ObtainLiftable(); // Check for Liftable / Obtain Liftable if possible
 		else
 		{
-			UpdateLiftedObject();	// Perform Updates on Current Liftable
+			// A GameObject is being lifted
+			UpdateLiftedObject();
 			if (Input.GetKeyDown(KeyCode.Mouse0)) ThrowLiftedObject();
 			if (Input.GetKeyDown(KeyCode.Mouse1)) ThrowLiftedObject(throwForce);
 		} 
 	}
 
-	private Quaternion rotationOffset;
+	// Manipulate lifted GameObject rotation and position
     void UpdateLiftedObject()
 	{
 		// Distance manipulation
@@ -36,15 +39,14 @@ public class LiftManipulate : MonoBehaviour
 		Mathf.Clamp(currentLiftDist, minLiftDist, maxLiftDist);
 		// Rotation maniupulation
 		if (Input.GetButton("Use"))
-		{
+		{		
 			float mX = Input.GetAxis("Mouse X");
 			float mY = Input.GetAxis("Mouse Y");
 			objectLifted.transform.Rotate(Vector3.up, -mX, Space.World);
 			objectLifted.transform.Rotate(transform.right, mY, Space.World);
 		}
-		//objectLifted.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + rotationOffset.eulerAngles);	
 		// Update position of lifted GameObject
-		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);		
+		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
 	}
 
 
@@ -53,8 +55,8 @@ public class LiftManipulate : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
-			// We can attempt to lift object
-			Debug.DrawRay(transform.position, transform.forward, Color.red, initialLiftRange);
+			// Lifter attempt to find in-range GameObject
+			if (debug) Debug.DrawRay(transform.position, transform.forward, Color.red, initialLiftRange);
 			RaycastHit hit;
 			if (Physics.Raycast(transform.position, transform.forward, out hit, initialLiftRange))
 			{
@@ -64,32 +66,37 @@ public class LiftManipulate : MonoBehaviour
 		}
 	}
 
+	// Adjust physics components of lifted GameObject if confirmed liftable
 	void PrepForManipulation()
 	{
 		PhysicsProperties ppLifted = objectLifted.GetComponent<PhysicsProperties>();
 		if (!ppLifted || !ppLifted.liftable)
 		{
 			objectLifted = null;
-			return;
+			return;	// GameObject was not liftable
 		}
-		// The GameObject is a confirmed liftable, continue
+
 		rbLifted = objectLifted.GetComponent<Rigidbody>();
-		rbLifted.velocity = Vector3.zero;
-		rbLifted.angularVelocity = Vector3.zero;
-		rbLifted.useGravity = false;
+		rbLifted.velocity 			= Vector3.zero;
+		rbLifted.angularVelocity 	= Vector3.zero;
+		rbLifted.useGravity 		= false;
+
 		colliderLifted = objectLifted.GetComponent<Collider>();
 		colliderLifted.enabled = false;
+
 		currentLiftDist = startLiftDist;
 		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
-		rotationOffset = new Quaternion();
+		objectLifted.transform.parent = this.transform;	// Preserves relativity of rotation when Lifter looks around
 	}
 
+	// Drop the currently lifted GameObject, and apply given force if provided
 	void ThrowLiftedObject(float force = 0f)
     {
 		rbLifted.useGravity = true;
 		colliderLifted.enabled = true;
 		// If force == 0 and Lifter was moving via their Rigidbody, we could apply Lifter velocity to objectLifted here.
 		rbLifted.AddForce(transform.forward * force);
+		objectLifted.transform.parent = null;
 		objectLifted = null;
     }
 	

@@ -7,5 +7,5 @@ using UnityEngine;
 /// </summary>
 public class PhysicsProperties : MonoBehaviour 
 {
-	public bool liftable = false;
+	public bool liftable = false;	// True - GameObject can be Lifted by Lifters
 }

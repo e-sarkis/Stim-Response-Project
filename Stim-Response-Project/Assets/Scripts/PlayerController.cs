@@ -24,15 +24,15 @@ public class PlayerController : MonoBehaviour
 	{
 		// No MouseLook when attempting object manipulation via "Use" button
 		if (!Input.GetButton("Use")) MouseLook();
-		
+
 		Move();
 		// Simple Clamping to Floor
 		transform.position = new Vector3(transform.position.x, 1f, transform.position.z);
 	}
 
 
-	public float mouseSensitivity = 50f;
-	public float angleClamp = 75f;
+	public float mouseSensitivity 	= 50f;
+	public float angleClamp 		= 75f;
 
 	/// <summary>
 	/// Simple 3D MouseLook
