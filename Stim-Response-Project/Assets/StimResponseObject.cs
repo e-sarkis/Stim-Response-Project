@@ -45,6 +45,15 @@ public class StimResponseObject : MonoBehaviour
 		}
 	}
 
+	public void ApplyStim(GameObject other, string stim)
+	{
+		StimResponseObject SRObj = other.gameObject.GetComponent<StimResponseObject>();
+		if(SRObj != null)	// Does the other gameobject potentially possess stims?
+		{
+			if (GlobalStims.ContainsKey(stim)) GlobalStims[stim]();
+		}
+	}
+
 	public IEnumerator addStimDelayed(float delayInSecs, string stim)
 	{
 		yield return new WaitForSeconds(delayInSecs);
@@ -54,7 +63,7 @@ public class StimResponseObject : MonoBehaviour
 		foreach (GameObject gObj in gameObjectsTouching)
 		{
 			srObj = gObj.GetComponent<StimResponseObject>();
-			if (srObj != null) srObj.ApplyStims(this.gameObject);
+			if (srObj != null) srObj.ApplyStim(this.gameObject, stim);
 		}
 	}
 
