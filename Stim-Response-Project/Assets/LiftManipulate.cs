@@ -36,7 +36,12 @@ public class LiftManipulate : MonoBehaviour
 	{
 		// Distance manipulation
 		currentLiftDist += Input.GetAxis("Mouse ScrollWheel");
-		Mathf.Clamp(currentLiftDist, minLiftDist, maxLiftDist);
+
+		//Mathf.Clamp(currentLiftDist, minLiftDist, maxLiftDist);	// Stopped working for unknown reason
+		// TEMP - Hardcode replacement for Mathf.Clamp
+		if (currentLiftDist < minLiftDist) currentLiftDist = minLiftDist;
+		if (currentLiftDist > maxLiftDist) currentLiftDist = maxLiftDist;
+		
 		// Rotation maniupulation
 		if (Input.GetButton("Use"))
 		{		
