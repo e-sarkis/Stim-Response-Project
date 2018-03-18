@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using System; // Included for System.Action
 using UnityEngine;
 
+
+public enum Stimulant
+{
+	Fire,
+	Water
+};
+
 /// <summary>
 /// Represent catalog of in-game physical stimulants and responses
 /// </summary>
 public class StimResponseObject : MonoBehaviour 
 {
-	public List<string> Stims;				// This Object's Stims represented by Strings
-	Dictionary<string, Action> GlobalStims;	// Dictionary Stim string -> System.Action
+	public List<Stimulant> Stims;				// This Object's Stims represented by Strings
+	Dictionary<Stimulant, Action> GlobalStims;	// Dictionary: Stim -> System.Action
 
 	// concurrent bags???
 	// Stim as it's own base class
 	// Scriptable obj
 	// Execute
-	// Evetn driven behaviours, Boyd's - Agent Simulation
+	// Evetn driven behaviours
 	// How do clocks work (second gear)?
 	// Subscription based information propagation
 
@@ -24,9 +31,9 @@ public class StimResponseObject : MonoBehaviour
 
 	void Start () 
 	{
-		GlobalStims = new Dictionary<string, Action>();	// Initialize Global Stim Dictionary
-		GlobalStims.Add("Fire", FireResponse);			// Fire
-		GlobalStims.Add("Water", WaterResponse);		// Water
+		GlobalStims = new Dictionary<Stimulant, Action>();	// Initialize Global Stim Dictionary
+		GlobalStims.Add(Stimulant.Fire, FireResponse);			// Fire
+		GlobalStims.Add(Stimulant.Water, WaterResponse);		// Water
 	}
 
 	void OnCollisionEnter(Collision other)
@@ -45,7 +52,7 @@ public class StimResponseObject : MonoBehaviour
 		StimResponseObject SRObj = other.gameObject.GetComponent<StimResponseObject>();
 		if(SRObj != null)	// Does the other gameobject potentially possess stims?
 		{
-			foreach(string stim in SRObj.Stims)
+			foreach(Stimulant stim in SRObj.Stims)
 			{
 				// Execute relevant function
 				if (GlobalStims.ContainsKey(stim)) GlobalStims[stim]();
@@ -53,7 +60,7 @@ public class StimResponseObject : MonoBehaviour
 		}
 	}
 
-	public void ApplyStim(GameObject other, string stim)
+	public void ApplyStim(GameObject other, Stimulant stim)
 	{
 		StimResponseObject SRObj = other.gameObject.GetComponent<StimResponseObject>();
 		if(SRObj != null)	// Does the other gameobject potentially possess stims?
@@ -62,7 +69,7 @@ public class StimResponseObject : MonoBehaviour
 		}
 	}
 
-	public IEnumerator addStimDelayed(float delayInSecs, string stim)
+	public IEnumerator addStimDelayed(float delayInSecs, Stimulant stim)
 	{
 		yield return new WaitForSeconds(delayInSecs);
 		Stims.Add(stim);

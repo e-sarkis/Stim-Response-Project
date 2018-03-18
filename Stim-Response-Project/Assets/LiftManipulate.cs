@@ -21,8 +21,10 @@ public class LiftManipulate : MonoBehaviour
 	
 	void Update () 
 	{
-		if (!objectLifted) ObtainLiftable(); // Check for Liftable / Obtain Liftable if possible
-		else
+		if (!objectLifted)
+		{
+			ObtainLiftable(); // Check for Liftable / Obtain Liftable if possible
+		} else
 		{
 			// A GameObject is being lifted
 			UpdateLiftedObject();
