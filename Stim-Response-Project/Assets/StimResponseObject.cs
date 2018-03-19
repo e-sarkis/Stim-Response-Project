@@ -18,13 +18,9 @@ public class StimResponseObject : MonoBehaviour
 	public List<Stimulant> Stims;				// This Object's Stims represented by Strings
 	Dictionary<Stimulant, Action> GlobalStims;	// Dictionary: Stim -> System.Action
 
-	// concurrent bags???
-	// Stim as it's own base class
-	// Scriptable obj
-	// Execute
-	// Evetn driven behaviours
-	// How do clocks work (second gear)?
-	// Subscription based information propagation
+	// TODO - Scriptable obj
+	// TODO - Event driven behaviours
+	// TODO - Subscription based information propagation
 
 	// GameObjects currently collided with
 	[HideInInspector] public List<GameObject> gameObjectsTouching;
