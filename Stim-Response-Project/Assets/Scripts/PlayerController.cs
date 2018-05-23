@@ -19,14 +19,29 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("Maximum vertical looking angle magnitude (X axis rotation)")]
 	public float angleClamp 		= 75f;
 
-	private float rotX = 0f;
-	private float rotY = 0f;
+	[Header("Headbob Settings")]
+	[Tooltip("Headbob magnitude in Unity units per bob")]
+	[Range(0.0f, 0.2f)]
+	public float headbobMagnitude	= 0.05f;
+	[Tooltip("Smoothing interpolation value of headbob transition from moving to not moving per second.")]
+	[Range(10.0f, 20.0f)]
+	public float headbobTransitionLerpValue = 20f;
+	[Tooltip("Headbob speed in Unity units per second")]
+	public float headbobSpeed 		= 4.8f;
+
+	private float _rotX = 0f;
+	private float _rotY = 0f;
+
+	private Vector3 _headbobRestPosition; // Local transform position of player Camera at rest
+	private float _headbobTimer = Mathf.PI / 2; // Sin(PI / 2) = 1;
 
 	void Awake () 
 	{
 		Vector3 rot = transform.localRotation.eulerAngles;
-		rotX = rot.x;
-		rotY = rot.y;
+		_rotX = rot.x;
+		_rotY = rot.y;
+
+		_headbobRestPosition = GetComponentInChildren<Camera>().transform.position;
 	}
 	
 
@@ -39,6 +54,7 @@ public class PlayerController : MonoBehaviour
 		}
 
 		Move();
+		Headbob();
 		// Simple Clamping to Floor
 		transform.position = new Vector3(transform.position.x, 1f, transform.position.z);
 	}
@@ -51,11 +67,11 @@ public class PlayerController : MonoBehaviour
 		float mX = Input.GetAxis("Mouse X");
 		float mY = Input.GetAxis("Mouse Y");
 
-		rotY += mX * mouseSensitivity * Time.deltaTime;
-		rotX += -mY * mouseSensitivity * Time.deltaTime;
-		rotX = Mathf.Clamp(rotX, -angleClamp, angleClamp);
+		_rotY += mX * mouseSensitivity * Time.deltaTime;
+		_rotX += -mY * mouseSensitivity * Time.deltaTime;
+		_rotX = Mathf.Clamp(_rotX, -angleClamp, angleClamp);
 
-		Quaternion localRot = Quaternion.Euler(rotX, rotY, 0f);
+		Quaternion localRot = Quaternion.Euler(_rotX, _rotY, 0f);
 		transform.rotation = localRot;
 	}
 
@@ -70,5 +86,40 @@ public class PlayerController : MonoBehaviour
 		// Strafe Right
 		transform.Translate(Input.GetAxisRaw("Horizontal")	* Vector3.right
 							* moveSpeed* Time.deltaTime);
+	}
+
+	/// <summary>
+	/// Simple 3D headbobbing
+	/// </summary>
+	void Headbob()
+	{
+		Transform cameraTransform = GetComponentInChildren<Camera>().transform;
+		float nextY; // The target bob position on Y axis for this Update
+		
+		// Determine target bob position on Y axis for this Update
+		if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+		{
+			_headbobTimer += headbobSpeed * Time.deltaTime;
+			nextY = Mathf.Lerp(	cameraTransform.position.y,
+								_headbobRestPosition.y + Mathf.Abs((Mathf.Sin(_headbobTimer) * headbobMagnitude)),
+								headbobTransitionLerpValue * Time.deltaTime);
+		} else
+		{
+			_headbobTimer = Mathf.PI / 2;
+			nextY = Mathf.Lerp(	cameraTransform.position.y,
+								_headbobRestPosition.y,
+								headbobTransitionLerpValue * Time.deltaTime);
+		}
+
+		// Set the new camera position
+		Vector3 nextPosition = new Vector3(	cameraTransform.position.x, nextY, cameraTransform.position.z);
+		cameraTransform.position = nextPosition;
+
+		// Simple _headbobTimer clamp to keep trig values meaningful
+		if (_headbobTimer > Mathf.PI * 2)
+		{
+			_headbobTimer -= Mathf.PI * 2;
+			Debug.Log(""+ _headbobTimer);
+		}
 	}
 }
