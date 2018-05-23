@@ -119,5 +119,4 @@ public class LiftManipulate : MonoBehaviour
 		objectLifted.transform.parent = null;
 		objectLifted = null;
     }
-	
 }
