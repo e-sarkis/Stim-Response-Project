@@ -119,7 +119,6 @@ public class PlayerController : MonoBehaviour
 		if (_headbobTimer > Mathf.PI * 2)
 		{
 			_headbobTimer -= Mathf.PI * 2;
-			Debug.Log(""+ _headbobTimer);
 		}
 	}
 }

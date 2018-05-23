@@ -5,18 +5,27 @@ using UnityEngine;
 
 public class LiftManipulate : MonoBehaviour 
 {
-	public float initialLiftRange 	= 1.5f;	// Range lifted GameObject is at Lift initiation
-	public float throwForce 		= 200f;	// Force applied when Lifter throws lifted GameObject
+	[Header("Distance Lifting Settings")]
+	[Tooltip("Liftable object detection range on Lift initiation")]
+	public float initialLiftRange 	= 1.5f;
+	[Tooltip("Force applied when Lifter throws lifted GameObject")]
+	public float throwForce 		= 200f;
 
-	public float minLiftDist 		= 0.8f;	// Closest range lifted GameObject can be to Lifter during lifting 
-	public float startLiftDist 		= 1;	// Range lifted GameObject is at Lift initiation
+	[Tooltip("Closest range lifted GameObject can be to Lifter during lifting")]
+	public float minLiftDist 		= 0.8f;
+	[Tooltip("Range lifted GameObject is at Lift initiation")]
+	public float startLiftDist 		= 1;
+	[Tooltip("Furthest range lifted GameObject can be to Lifter during lifting")]
 	public float maxLiftDist 		= 2.0f;	// Furthest range lifted GameObject can be to Lifter during lifting 
-	private float currentLiftDist 	= 0.0f;	// Range of lifted GameObject to Lifter
+	[Tooltip("Smoothing interpolation value of headbob transition from moving to not moving per second.")]
+	public float liftDistLerp 		= 1.0f; 
+	private float _currentLiftDist 	= 0.0f;	// Range of lifted GameObject to Lifter
 
 	[HideInInspector] public GameObject objectLifted;	// GameObject being lifted
-	private Rigidbody rbLifted;							// Rigidbody of lifted GameObject
-	private Collider colliderLifted;					// Collider of lifted GameObject
+	private Rigidbody _rbLifted;							// Rigidbody of lifted GameObject
+	private Collider _colliderLifted;					// Collider of lifted GameObject
 
+	[Header("DEBUG")]
 	public bool debug = false;
 	
 	void Update () 
@@ -37,12 +46,12 @@ public class LiftManipulate : MonoBehaviour
     void UpdateLiftedObject()
 	{
 		// Distance manipulation
-		currentLiftDist += Input.GetAxis("Mouse ScrollWheel");
+		_currentLiftDist += Input.GetAxis("Mouse ScrollWheel");
 
 		//Mathf.Clamp(currentLiftDist, minLiftDist, maxLiftDist);	// Stopped working for unknown reason
 		// TEMP - Hardcode replacement for Mathf.Clamp
-		if (currentLiftDist < minLiftDist) currentLiftDist = minLiftDist;
-		if (currentLiftDist > maxLiftDist) currentLiftDist = maxLiftDist;
+		if (_currentLiftDist < minLiftDist) _currentLiftDist = minLiftDist;
+		if (_currentLiftDist > maxLiftDist) _currentLiftDist = maxLiftDist;
 		
 		// Rotation maniupulation
 		if (Input.GetButton("Use"))
@@ -53,7 +62,10 @@ public class LiftManipulate : MonoBehaviour
 			objectLifted.transform.Rotate(transform.right, mY, Space.World);
 		}
 		// Update position of lifted GameObject
-		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
+		objectLifted.transform.position = Vector3.Lerp(
+										objectLifted.transform.position,
+										transform.position + (transform.forward * _currentLiftDist),
+										liftDistLerp * Time.deltaTime);
 	}
 
 
@@ -83,26 +95,27 @@ public class LiftManipulate : MonoBehaviour
 			return;	// GameObject was not liftable
 		}
 
-		rbLifted = objectLifted.GetComponent<Rigidbody>();
-		rbLifted.velocity 			= Vector3.zero;
-		rbLifted.angularVelocity 	= Vector3.zero;
-		rbLifted.useGravity 		= false;
+		_rbLifted = objectLifted.GetComponent<Rigidbody>();
+		_rbLifted.velocity 			= Vector3.zero;
+		_rbLifted.angularVelocity 	= Vector3.zero;
+		_rbLifted.useGravity 		= false;
 
-		colliderLifted = objectLifted.GetComponent<Collider>();
-		colliderLifted.enabled = false;
+		_colliderLifted = objectLifted.GetComponent<Collider>();
+		_colliderLifted.enabled = false;
 
-		currentLiftDist = startLiftDist;
-		objectLifted.transform.position = transform.position + (transform.forward * currentLiftDist);
+		_currentLiftDist = startLiftDist;
+		
+		objectLifted.transform.position = transform.position + (transform.forward * _currentLiftDist);
 		objectLifted.transform.parent = this.transform;	// Preserves relativity of rotation when Lifter looks around
 	}
 
 	// Drop the currently lifted GameObject, and apply given force if provided
 	void ThrowLiftedObject(float force = 0f)
     {
-		rbLifted.useGravity = true;
-		colliderLifted.enabled = true;
+		_rbLifted.useGravity = true;
+		_colliderLifted.enabled = true;
 		// If force == 0 and Lifter was moving via their Rigidbody, we could apply Lifter velocity to objectLifted here.
-		rbLifted.AddForce(transform.forward * force);
+		_rbLifted.AddForce(transform.forward * force);
 		objectLifted.transform.parent = null;
 		objectLifted = null;
     }

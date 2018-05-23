@@ -16,7 +16,7 @@ public enum Stimulant
 public class StimResponseObject : MonoBehaviour 
 {
 	public List<Stimulant> Stims;				// This Object's Stims represented by Strings
-	Dictionary<Stimulant, Action> GlobalStims;	// Dictionary: Stim -> System.Action
+	protected Dictionary<Stimulant, Action> GlobalStims;	// Dictionary: Stim -> System.Action
 
 	// TODO - Scriptable obj
 	// TODO - Event driven behaviours
